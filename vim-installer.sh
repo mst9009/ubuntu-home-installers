@@ -26,26 +26,47 @@ cd $WORK_DIR &&
         echo "vim exist, skip install!"
     else
         echo "install vim ..." &&
+        VIM_CONFIG_FLAGS="--prefix=$VIM_INSTALL_PREFIX \
+                          --with-features=huge \
+                          --enable-cscope \
+                          --enable-multibyte \
+                          --enable-rubyinterp=yes \
+                          --enable-perlinterp=yes \
+                          --enable-luainterp=yes \
+                          --enable-gui=gtk2" &&
         PYTHON_BIN=$(which python) &&
         {
             if [ "$PYTHON_BIN" != "" ]
             then
                 PYTHON_ROOT=$(dirname $(dirname $PYTHON_BIN)) &&
+		        PYTHON_VERSION=$(python -V 2>&1|awk '{print $2}'|awk -F '.' '{print $1"."$2}') &&
                 {
-                    for PY_CFG in `find $PYTHON_ROOT/lib -name python* -type d -exec find {} -maxdepth 1 -name "config*" -type d \;`
+                    for PY_CFG in $(find $PYTHON_ROOT/lib -name python$PYTHON_VERSION -type d -exec find {} -maxdepth 1 -name "config*" -type d \;)
                     do
-                        WITH_PYTHON_CONFIG_DIR=--with-python-config-dir=$PY_CFG/ &&
-                        echo "find python config dictionary in $PY_CFG/" && 
-                        echo "we will build vim with $WITH_PYTHON_CONFIG_DIR"
+                        VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-pythoninterp=yes --with-python-config-dir=$PY_CFG"
                         break
                     done
                 }
             fi
         } &&
-
+        PYTHON3_BIN=$(which python3) &&
+        {
+            if [ "$PYTHON3_BIN" != "" ]
+            then
+                PYTHON3_ROOT=$(dirname $(dirname $PYTHON3_BIN)) &&
+                PYTHON3_VERSION=$(python3 -V 2>&1|awk '{print $2}'|awk -F '.' '{print $1"."$2}') &&
+                {
+                    for PY3_CFG in $(find $PYTHON3_ROOT/lib -name python$PYTHON3_VERSION -type d -exec find {} -maxdepth 1 -name "config*" -type d \;)
+                    do
+                        VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-python3interp=yes --with-python3-config-dir=$PY3_CFG"
+                        break
+                    done
+                }
+            fi
+        } &&
+        echo "configure vim with flags: $VIM_CONFIG_FLAGS" &&
         cd $WORK_DIR && git clone --recursive https://github.com/vim/vim.git $VIM_DOWNLOAD_DIR && cd $VIM_DOWNLOAD_DIR &&
-        ./configure --with-features=huge --enable-pythoninterp --enable-rubyinterp --enable-luainterp --enable-perlinterp \
-            --enable-gui=gtk2 --enable-cscope --prefix=$VIM_INSTALL_PREFIX $WITH_PYTHON_CONFIG_DIR &&
+        ./configure $VIM_CONFIG_FLAGS &&
         make -j16 && make install &&
         cd $WORK_DIR && rm -fr $VIM_DOWNLOAD_DIR &&
         echo "install vim done!"
