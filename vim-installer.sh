@@ -36,7 +36,7 @@ cd $WORK_DIR &&
         VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-luainterp=yes" &&
         VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-gui=gtk2" &&
         # Default, we use pythons in conda envs
-        # If there is neither a conda nor python env, just comment the activate line and corresponding deactivate line
+        # If there is neither a conda nor python env, just comment the definations below
         PYTHON2_ENV=py27 && PYTHON3_ENV=py36 &&
         {
             for PYTHON_MAJOR in 2 3
@@ -48,25 +48,39 @@ cd $WORK_DIR &&
                     fi 
                 } &&
                 eval PYTHON_ENV=$(echo "\$PYTHON${PYTHON_MAJOR}_ENV") &&
-                source activate $PYTHON_ENV &&
-                PYTHON_EXECUTABLE=$(which python${PYTHON_MAJOR}) &&
-                PYTHON_VERSION=$($PYTHON_EXECUTABLE -V 2>&1|awk '{print $2}'|awk -F '.' '{print $1"."$2}') &&
-                PYTHON_ROOT=$(dirname $(dirname $PYTHON_EXECUTABLE)) &&
                 {
-                    for PY_CFG in $(find $PYTHON_ROOT/lib -name python$PYTHON_VERSION -type d -exec find {} -maxdepth 1 -name "config*" -type d \; 2>/dev/null)
-                    do
-                        VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-python${PYTHON_QUALIFIER}interp=yes --with-python${PYTHON_QUALIFIER}-config-dir=$PY_CFG" && break
-                    done
+                    if [ "$PYTHON_ENV" != "" ]
+                    then
+                        source activate $PYTHON_ENV
+                    fi
                 } &&
-                source deactivate
+                PYTHON_EXECUTABLE=$(which python${PYTHON_MAJOR}) &&
+                {
+                    if [ "$PYTHON_EXECUTABLE" != "" ]
+                    then
+                        PYTHON_VERSION=$($PYTHON_EXECUTABLE -V 2>&1|awk '{print $2}'|awk -F '.' '{print $1"."$2}') &&
+                        PYTHON_ROOT=$(dirname $(dirname $PYTHON_EXECUTABLE)) &&
+                        {
+                            for PY_CFG in $(find $PYTHON_ROOT/lib -name python$PYTHON_VERSION -type d -exec find {} -maxdepth 1 -name "config*" -type d \; 2>/dev/null)
+                            do
+                                VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-python${PYTHON_QUALIFIER}interp=yes --with-python${PYTHON_QUALIFIER}-config-dir=$PY_CFG" && break
+                            done
+                        }
+                    fi
+                } &&
+                {
+                    if [ "$PYTHON_ENV" != "" ]
+                    then
+                        source deactivate
+                    fi
+                }
             done
         } &&
-
         echo "configure vim with flags: $VIM_CONFIG_FLAGS" &&
         cd $WORK_DIR && git clone --recursive https://github.com/vim/vim.git $VIM_DOWNLOAD_DIR && cd $VIM_DOWNLOAD_DIR &&
         ./configure $VIM_CONFIG_FLAGS &&
         make -j16 && make install &&
         cd $WORK_DIR && rm -fr $VIM_DOWNLOAD_DIR &&
-        echo "install vim done!"
+        echo "Installed vim successfully!"
     fi
 }
