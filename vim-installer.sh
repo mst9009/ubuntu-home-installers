@@ -26,44 +26,42 @@ cd $WORK_DIR &&
         echo "vim exist, skip install!"
     else
         echo "install vim ..." &&
-        VIM_CONFIG_FLAGS="--prefix=$VIM_INSTALL_PREFIX \
-                          --with-features=huge \
-                          --enable-cscope \
-                          --enable-multibyte \
-                          --enable-rubyinterp=yes \
-                          --enable-perlinterp=yes \
-                          --enable-luainterp=yes \
-                          --enable-gui=gtk2" &&
-        PYTHON_BIN=$(which python) &&
+        # Definations below make it easier to comment out unwanted features
+        VIM_CONFIG_FLAGS="--prefix=$VIM_INSTALL_PREFIX" &&
+        VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --with-features=huge" &&
+        VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-cscope" &&
+        VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-multibyte" &&
+        VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-rubyinterp=yes" &&
+        VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-perlinterp=yes" &&
+        VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-luainterp=yes" &&
+        VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-gui=gtk2" &&
+        # Default, we use pythons in conda envs
+        # If there is neither a conda nor python env, just comment the activate line and corresponding deactivate line
+        PYTHON2_ENV=py27 && PYTHON3_ENV=py36 &&
         {
-            if [ "$PYTHON_BIN" != "" ]
-            then
-                PYTHON_ROOT=$(dirname $(dirname $PYTHON_BIN)) &&
-		        PYTHON_VERSION=$(python -V 2>&1|awk '{print $2}'|awk -F '.' '{print $1"."$2}') &&
+            for PYTHON_MAJOR in 2 3
+            do
                 {
-                    for PY_CFG in $(find $PYTHON_ROOT/lib -name python$PYTHON_VERSION -type d -exec find {} -maxdepth 1 -name "config*" -type d \;)
-                    do
-                        VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-pythoninterp=yes --with-python-config-dir=$PY_CFG"
-                        break
-                    done
-                }
-            fi
-        } &&
-        PYTHON3_BIN=$(which python3) &&
-        {
-            if [ "$PYTHON3_BIN" != "" ]
-            then
-                PYTHON3_ROOT=$(dirname $(dirname $PYTHON3_BIN)) &&
-                PYTHON3_VERSION=$(python3 -V 2>&1|awk '{print $2}'|awk -F '.' '{print $1"."$2}') &&
+                    if [ $PYTHON_MAJOR -gt 2 ]
+                    then
+                        PYTHON_QUALIFIER=$PYTHON_MAJOR
+                    fi 
+                } &&
+                eval PYTHON_ENV=$(echo "\$PYTHON${PYTHON_MAJOR}_ENV") &&
+                source activate $PYTHON_ENV &&
+                PYTHON_EXECUTABLE=$(which python${PYTHON_MAJOR}) &&
+                PYTHON_VERSION=$($PYTHON_EXECUTABLE -V 2>&1|awk '{print $2}'|awk -F '.' '{print $1"."$2}') &&
+                PYTHON_ROOT=$(dirname $(dirname $PYTHON_EXECUTABLE)) &&
                 {
-                    for PY3_CFG in $(find $PYTHON3_ROOT/lib -name python$PYTHON3_VERSION -type d -exec find {} -maxdepth 1 -name "config*" -type d \;)
+                    for PY_CFG in $(find $PYTHON_ROOT/lib -name python$PYTHON_VERSION -type d -exec find {} -maxdepth 1 -name "config*" -type d \; 2>/dev/null)
                     do
-                        VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-python3interp=yes --with-python3-config-dir=$PY3_CFG"
-                        break
+                        VIM_CONFIG_FLAGS="$VIM_CONFIG_FLAGS --enable-python${PYTHON_QUALIFIER}interp=yes --with-python${PYTHON_QUALIFIER}-config-dir=$PY_CFG" && break
                     done
-                }
-            fi
+                } &&
+                source deactivate
+            done
         } &&
+
         echo "configure vim with flags: $VIM_CONFIG_FLAGS" &&
         cd $WORK_DIR && git clone --recursive https://github.com/vim/vim.git $VIM_DOWNLOAD_DIR && cd $VIM_DOWNLOAD_DIR &&
         ./configure $VIM_CONFIG_FLAGS &&
