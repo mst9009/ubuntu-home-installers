@@ -1,0 +1,37 @@
+# Append programs in $HOME/.local to .bashrc
+# If you have fresh OS, you can run "cat ${this_file} >>~/.bashrc && source ~/.bashrc"
+# Else you can modify this settings in ~/.bashrc directly
+# Most importantly, we recommend backing up the original files first
+
+PROGRAM_ROOT=$HOME/.local
+BIN_APPENDAGE_DIRS="llvm opencv vim cuda cmake"
+INCLUDE_APPENDAGE_DIRS="llvm opencv cuda cudnn/cuda"
+LIBRARY_APPENDAGE_DIRS="llvm opencv cuda cudnn/cuda"
+
+for BIN_DIR in $BIN_APPENDAGE_DIRS 
+do
+    for BIN_ROOT in $(find $PROGRAM_ROOT/$BIN_DIR -maxdepth 1 -name "bin" \( -type d -or -type l \) 2>/dev/null)
+    do
+        PATH="$BIN_ROOT:$PATH"
+    done
+done
+
+for INCLUDE_DIR in $INCLUDE_APPENDAGE_DIRS
+do
+    for INCLUDE_ROOT in $(find $PROGRAM_ROOT/$INCLUDE_DIR -maxdepth 1 -name "include" \( -type d -or -type l \) 2>/dev/null)
+    do
+        C_INCLUDE_PATH="$INCLUDE_ROOT:$C_INCLUDE_PATH"
+        CPLUS_INCLUDE_PATH="$INCLUDE_ROOT:$CPLUS_INCLUDE_PATH"
+    done
+done
+
+for LIBRARY_DIR in $LIBRARY_APPENDAGE_DIRS
+do
+    for LIBRARY_ROOT in $(find $PROGRAM_ROOT/$LIBRARY_DIR -maxdepth 1 \( -name "lib" -or -name "lib64" \) \( -type d -or -type l \) 2>/dev/null)
+    do
+        LIBRARY_PATH="$LIBRARY_ROOT:$LIBRARY_PATH"
+        LD_LIBRARY_PATH="$LIBRARY_ROOT:$LD_LIBRARY_PATH"
+    done
+done
+
+export PATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH LIBRARY_PATH LD_LIBRARY_PATH
