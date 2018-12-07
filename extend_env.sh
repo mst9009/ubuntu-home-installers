@@ -1,8 +1,12 @@
-# Append programs in $HOME/.local to .bashrc
-# If you have fresh OS, you can run "cat ${this_file} >>~/.bashrc && source ~/.bashrc"
-# Else you can modify this settings in ~/.bashrc directly
-# Most importantly, we recommend backing up the original files first
-
+#!/bin/bash
+# Extend env variabls in $HOME/.local 
+# Usage:
+#   ln -sf ${this file} ~/.extend_env.sh
+# Then append belows to ~/.bashrc
+#   if [ -x ~/.extend_env.sh ]
+#   then
+#     . "~/.extend_env.sh"
+#   fi
 PROGRAM_ROOT=$HOME/.local
 BIN_APPENDAGE_DIRS="llvm opencv vim cuda cmake"
 INCLUDE_APPENDAGE_DIRS="llvm opencv cuda cudnn/cuda"
@@ -12,7 +16,10 @@ for BIN_DIR in $BIN_APPENDAGE_DIRS
 do
     for BIN_ROOT in $(find $PROGRAM_ROOT/$BIN_DIR -maxdepth 1 -follow -name "bin" \( -type d -or -type l \) 2>/dev/null)
     do
-        PATH="$BIN_ROOT:$PATH"
+        if [[ $PATH != *$BIN_ROOT* ]]
+        then
+            PATH="$BIN_ROOT:$PATH"
+        fi
     done
 done
 
@@ -20,8 +27,14 @@ for INCLUDE_DIR in $INCLUDE_APPENDAGE_DIRS
 do
     for INCLUDE_ROOT in $(find $PROGRAM_ROOT/$INCLUDE_DIR -maxdepth 1 -follow -name "include" \( -type d -or -type l \) 2>/dev/null)
     do
-        C_INCLUDE_PATH="$INCLUDE_ROOT:$C_INCLUDE_PATH"
-        CPLUS_INCLUDE_PATH="$INCLUDE_ROOT:$CPLUS_INCLUDE_PATH"
+        if [[ $C_INCLUDE_PATH != *$INCLUDE_ROOT* ]]
+        then
+            C_INCLUDE_PATH="$INCLUDE_ROOT:$C_INCLUDE_PATH"
+        fi
+        if [[ $CPLUS_INCLUDE_PATH != *$INCLUDE_ROOT* ]]
+        then
+            CPLUS_INCLUDE_PATH="$INCLUDE_ROOT:$CPLUS_INCLUDE_PATH"
+        fi
     done
 done
 
@@ -29,8 +42,14 @@ for LIBRARY_DIR in $LIBRARY_APPENDAGE_DIRS
 do
     for LIBRARY_ROOT in $(find $PROGRAM_ROOT/$LIBRARY_DIR -maxdepth 1 -follow \( -name "lib" -or -name "lib64" \) \( -type d -or -type l \) 2>/dev/null)
     do
-        LIBRARY_PATH="$LIBRARY_ROOT:$LIBRARY_PATH"
-        LD_LIBRARY_PATH="$LIBRARY_ROOT:$LD_LIBRARY_PATH"
+        if [[ $LIBRARY_PATH != *$LIBRARY_ROOT* ]]
+        then
+            LIBRARY_PATH="$LIBRARY_ROOT:$LIBRARY_PATH"
+        fi
+        if [[ $LD_LIBRARY_PATH != *$LIBRARY_ROOT* ]]
+        then
+            LD_LIBRARY_PATH="$LIBRARY_ROOT:$LD_LIBRARY_PATH"
+        fi
     done
 done
 
