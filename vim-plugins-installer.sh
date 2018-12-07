@@ -26,35 +26,7 @@ PLUGIN_VUNDLE_ROOT=$VIM_BUNDLE_ROOT/Vundle.vim &&
     fi
 } &&
 
-VIMRC_FILE=$HOME/.vimrc && touch $VIMRC_FILE &&
-{
-cat<<EOF>$VIMRC_FILE
-filetype off
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'Lokaltog/vim-powerline'
-Plugin 'octol/vim-cpp-enhanced-highlight'
-Plugin 'Yggdroot/indentLine'
-Plugin 'derekwyatt/vim-fswitch'
-Plugin 'terryma/vim-multiple-cursors'
-Plugin 'scrooloose/nerdcommenter'
-Plugin 'vim-scripts/DrawIt'
-Plugin 'SirVer/ultisnips'
-Plugin 'honza/vim-snippets'
-Plugin 'Valloric/YouCompleteMe'
-Plugin 'derekwyatt/vim-protodef'
-Plugin 'scrooloose/nerdtree'
-Plugin 'fholgado/minibufexpl.vim'
-Plugin 'gcmt/wildfire.vim'
-Plugin 'Lokaltog/vim-easymotion'
-Plugin 'yegappan/grep'
-Plugin 'mileszs/ack.vim'
-Plugin 'dyng/ctrlsf.vim'
-call vundle#end()
-filetype plugin indent on
-EOF
-} &&
+VIMRC_FILE=$HOME/.vimrc && ln -sf $WORK_DIR/.vimrc.full $VIMRC_FILE &&
 
 # If you have a custom vim and you want to use this version, uncomment this line
 # Otherwise, if you want to use the systerm vim, keep this line comment
@@ -125,120 +97,10 @@ YCM_BUILD_DIR=ycm-build &&
         
         echo "build YCM from source done!"
     }
-} &&
-{
-cat<<EOF>>$VIMRC_FILE
-" set the value of <leader>
-let mapleader=";"
-set incsearch
-set ignorecase
-set nocompatible
-set backspace=indent,eol,start
-" enable intelligent completion of vim command-line
-set wildmenu
-" enable status bar
-set laststatus=2
-" displays the current position of the cursor
-set ruler
-" enable line number
-set number
-" highlight cursor line
-" set cursorline
-" highlight cursor colum
-" set cursorcolumn
-" highlight search results
-set hlsearch
-" disable cursor flicker
-set gcr=a:block-blinkon0
-set nowrap
-" set gvim font
-set guifont=YaHei\ Consolas\ Hybrid\ 11.5
-syntax enable
-syntax on
-" switch split screens in insert mode
-imap <C-W> <Esc><C-W>
-" indent setting
-" expanding tab to multi spaces
-set expandtab
-" the length (number of spaces) of a tab while editing
-set tabstop=4
-" the length (number of spaces) of a tab while formatting
-set shiftwidth=4
-" consider a continuous number of Spaces as a TAB character
-set softtabstop=4
-" fold setting
-set foldmethod=indent
-" set foldmethod=syntax
-" unfold when starting vim
-set nofoldenable
-" vim-fswitch setting
-nmap <silent> <Leader>sw :FSHere<cr>
-" ctrlsf setting
-nnoremap <Leader>sp :CtrlSF<CR>
-" UltiSnips setting
-let g:UltiSnipsExpandTrigger="<leader><tab>"
-let g:UltiSnipsJumpForwardTrigger="<leader><tab>"
-let g:UltiSnipsJumpBackwardTrigger="<leader><s-tab>"
-" ycm setting
-let g:ycm_complete_in_comments=1
-" specifies a fallback path to a config file which is used if no .ycm_extra_conf.py is found
-" TODO: comment or modify this line once you have a .ycm_extra_conf.py or compile_commands.json
-let g:ycm_global_ycm_extra_conf='$PLUGIN_YCM_ROOT/third_party/ycmd/.ycm_extra_conf.py'
-" allow vim to load the.ycm_extra_conf.py file without prompting
-let g:ycm_confirm_extra_conf=0
-" shortcut for OmniCppComplete engine
-inoremap <leader>c <C-x><C-o>
-" the completion content does not appear as a sub-window, but only as a completion list
-set completeopt-=preview
-let g:ycm_add_preview_to_completeopt=0
-" list the matches from the first character
-let g:ycm_min_num_of_chars_for_completion=1
-" disable cache the matches
-let g:ycm_cache_omnifunc=0
-" syntax keyword completion
-let g:ycm_seed_identifiers_with_syntax=1
-nnoremap <leader>gt :YcmCompleter GoTo<CR>
-nnoremap <leader>gc :YcmCompleter GoToDeclaration<CR>
-nnoremap <leader>gd :YcmCompleter GoToDefinition<CR>
-" protodef setting
-" the path of pullproto.pl
-let g:protodefprotogetter='$VIM_BUNDLE_ROOT/protodef/pullproto.pl'
-" keep the order between declaration and defination
-let g:disable_protodef_sorting=1
-" NERDtree setting
-nmap <Leader>fl :NERDTreeToggle<CR>
-let NERDTreeWinSize=32
-let NERDTreeWinPos="right"
-let NERDTreeShowHidden=1
-" disable redundant help information in NERDtree subwindow
-let NERDTreeMinimalUI=1
-" remove corresponding buffer while the file removed 
-let NERDTreeAutoDeleteBuffer=1
-" MiniBufExplorer setting
-map <Leader>bl :MBEToggle<cr>
-map <Leader>bn :MBEbn<cr>
-map <Leader>bp :MBEbp<cr>
-" wildfire setting
-map <SPACE> <Plug>(wildfire-fuel)
-vmap <S-SPACE> <Plug>(wildfire-water)
-let g:wildfire_objects = ["i'", 'i"', "i)", "i]", "i}", "i>", "ip"]
-"indent-line setting"
-let g:indentLine_char='|'
-let g:indentLine_enabled=1
-EOF
 } && echo "config vim done!" ||
 {
     echo "something went error, we will restore vim settings..." &&
-{
-cat<<EOF>$VIMRC_FILE
-filetype off
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
-call vundle#end()
-filetype plugin indent on
-EOF
-} &&
+    ln -sf $WORK_DIR/.vimrc.base $VIMRC_FILE &&
     $VIM_BIN +PluginClean! +qall ||
     {
         cd $VIM_BUNDLE_ROOT && rm -fr *
