@@ -78,7 +78,7 @@ let g:UltiSnipsJumpBackwardTrigger="<leader><s-tab>"
 let g:ycm_complete_in_comments=1
 " specifies a fallback path to a config file which is used if no .ycm_extra_conf.py is found
 " TODO: comment or modify this line once you have a .ycm_extra_conf.py or compile_commands.json
-let g:ycm_global_ycm_extra_conf='$PLUGIN_YCM_ROOT/third_party/ycmd/.ycm_extra_conf.py'
+let g:ycm_global_ycm_extra_conf='$HOME/.vim/bundle/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py'
 " allow vim to load the.ycm_extra_conf.py file without prompting
 let g:ycm_confirm_extra_conf=0
 " shortcut for OmniCppComplete engine
@@ -97,7 +97,7 @@ nnoremap <leader>gc :YcmCompleter GoToDeclaration<CR>
 nnoremap <leader>gd :YcmCompleter GoToDefinition<CR>
 " protodef setting
 " the path of pullproto.pl
-let g:protodefprotogetter='$VIM_BUNDLE_ROOT/protodef/pullproto.pl'
+let g:protodefprotogetter='$HOME/.vim/bundle/vim-protodef/pullproto.pl'
 " keep the order between declaration and defination
 let g:disable_protodef_sorting=1
 " NERDtree setting
