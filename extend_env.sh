@@ -8,7 +8,7 @@
 #     . "~/.extend_env.sh"
 #   fi
 PROGRAM_ROOT=$HOME/.local
-BIN_APPENDAGE_DIRS="llvm opencv vim cuda cmake tmux"
+BIN_APPENDAGE_DIRS="llvm opencv vim cuda cmake tmux bazel"
 INCLUDE_APPENDAGE_DIRS="llvm opencv cuda cudnn/cuda libevent ncurses"
 LIBRARY_APPENDAGE_DIRS="llvm opencv cuda cudnn/cuda libevent ncurses"
 
